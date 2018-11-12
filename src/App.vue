@@ -1,10 +1,9 @@
 <template>
-  <div id="app">
+  <div id="app" class="game-window">
     <game-header></game-header>
-    <p> Lifes left {{this.guessesLeft}}</p>
-    <p>Letters used: <span v-for="(letter, index) in lettersUsed" :key="index">{{letter}}</span></p>
-    <p><span v-for="(guess,index) in guessed" :key=index>{{guess}} </span></p>
-    <answer :answer="this.answer"></answer>
+    <game-details :guesses-left="this.guessesLeft"
+   :letters-used="this.lettersUsed"
+   :guessed="this.guessed"></game-details>
     <player-controls :is-game-on=isGameOn 
     @gameStarted="startGame"
     @gameFinished="endGame"
@@ -16,6 +15,8 @@
 import GameHeader from './components/game-header.vue'
 import PlayerControls from './components/player-controls.vue'
 import Answer from './components/answer.vue'
+import GameDetails from './components/game-details.vue'
+
 
 
 
@@ -24,7 +25,6 @@ export default {
   data:function() {
     return {
       isGameOn:false,
-      answersArray:["Cygan","Bagno","Baba",],
       answer:"",
       guessesLeft:10,
       lettersUsed:[],
@@ -42,14 +42,14 @@ export default {
       }).then((response) => {
         return response.json()
       }).then((data) => {
-        this.answer = data.word.replace(/[\W_]+/g," ");
-        this.toGuess = this.answer.replace(/ /g,'').length;
+        this.answer = data.word.replace(/[\W_]+/g," "); //replace all non alphabetic characters with regular space
+        this.toGuess = this.answer.replace(/ /g,'').length; // number of found letters to win
         this.isGameOn = true
-        for (let i = 0; i < this.answer.length; i++) {
-          let answerSplitted=this.answer.split('')
-          if(answerSplitted[i] === " "){
+        for (let i = 0; i < this.answer.length; i++) {  // for loop pushing appropriate characters to guessed array 
+        let answerSplitted=this.answer.split('')      // white spaces are replaced with -
+          if(answerSplitted[i] === " "){ 
           this.guessed.push("-")
-          } else {
+          } else {                                 /// letters are replaced with _
             this.guessed.push("_")
           }
         }
@@ -71,7 +71,8 @@ export default {
         if (index === -1) { // if answer does not  contain the letter 
           this.guessesLeft-- // take one life away
           if (this.guessesLeft == 0) { // reset the game if player ran out of lifes.
-            this.endGame()
+           window.alert("You loss! The answer is : " + this.answer)
+            this.endGame() 
           }
         } else {                  //if answer contains the letter
         
@@ -79,7 +80,7 @@ export default {
            this.toGuess--         
           this.guessed[index] = letter;
           if(this.toGuess === 0){  // if player guessed everything 
-            window.alert("You won! Answer is: "+ this.answer)   // pop up the alert
+            window.alert("You won! The answer is: "+ this.answer)   // pop up the alert
             this.endGame(); // end the game 
           } index = this.answer.toUpperCase().indexOf(letter, index + 1)
           }
@@ -95,9 +96,21 @@ export default {
     GameHeader,
     PlayerControls,
     Answer,
+    GameDetails
   }
 }
 </script>
 
 <style>
+@import url("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300");
+body{
+  font-family: 'Open Sans Condensed', sans-serif;
+}
+
+
+.game-window{
+  width: 450px;
+  margin:auto;
+  text-align: center;
+}
 </style>
